@@ -1,0 +1,90 @@
+
+  // Create two frame stick together 
+  private JFrame frame1 = new JFrame("Frame 1");
+  private JFrame frame2 = new JFrame("Frame 2");
+  public UML_Editor( ){
+    // set frames without titlebar
+    frame1.setUndecorated(true);
+    frame2.setUndecorated(true);
+    // create a button on the frames then add action listener
+    JButton titlebar = new JButton("Button 1");
+    // JButton button2 = new JButton("Button 2");
+    // set button size width full height 20px
+    titlebar.setPreferredSize(new Dimension(frame1.getWidth(), 50));
+    // button2.setPreferredSize(new Dimension(frame2.getWidth(), 20));
+    // add button to frame
+    frame1.add(titlebar);
+    frame2.add(titlebar);
+    
+
+    // Set the size of the frame
+    frame1.setSize(300,300);
+    frame2.setSize(300,300);
+    // Set the location of the frame
+    frame1.setLocation(0,0);
+    frame2.setLocation(300,0);
+    // Set the default close operation
+    frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    // Set the layout of the frame
+    frame1.setLayout(new FlowLayout());
+    frame2.setLayout(new FlowLayout());
+    // set frame visiable
+    frame1.setVisible(true);
+    frame2.setVisible(true);
+    // frame1.setBackground(new Color(0, 0, 0, 0));
+    frame1.setOpacity(1.0f);
+    frame1.setContentPane(new ShadowPanel());
+    frame2.setOpacity(1.0f);
+    frame2.setContentPane(new ShadowPanel());
+
+
+    // Create a panel
+    // JPanel panel1 = new JPanel();
+    // JPanel panel2 = new JPanel();
+    // // Set the background color of the panel
+    // panel1.setBackground(Color.red);
+    // panel2.setBackground(Color.blue);
+    // // Add the panel to the frame
+    // frame1.add(panel1);
+    // frame2.add(panel2);
+    // // Set the size of the panel
+    // panel1.setPreferredSize(new Dimension(300,300));
+    // panel2.setPreferredSize(new Dimension(300,300));
+    // // Set the layout of the panel
+    // panel1.setLayout(new FlowLayout());
+    // panel2.setLayout(new FlowLayout());
+    // // Create a button
+    // JButton button1 = new JButton("Button 1");
+    // JButton button2 = new JButton("Button 2");
+    // // Add the button to the panel
+    // panel1.add(button1);
+    // panel2.add(button2);
+    // // Set the size of the button
+    // button1.setPreferredSize(new Dimension(100,100));
+    // button2.setPreferredSize(new Dimension(100,100));
+    // // Set the location of the button
+    // button1.setLocation(0,0);
+    // button2.setLocation(0,0);
+    // // Set the background color of the button
+    // button1.setBackground(Color.red);
+    // button2.setBackground(Color.blue);
+    // // Set the foreground color of the button
+    // button1.setForeground(Color.white);
+    // button2.setForeground(Color.white);
+    // // Set the font of the button
+    // button1.setFont(new Font("Arial",Font.BOLD,20));
+    // button2.setFont(new Font("Arial",Font.BOLD,20));
+    // // Set the border of the button
+    // button1.setBorder(BorderFactory.createLineBorder(Color.black));
+    // button2.setBorder(BorderFactory.createLineBorder(Color.black));
+    // // Set the text of the button
+    // button1.setText("Button 1");
+    // button2.setText("Button 2");
+    // // Set the action command of the button
+    // button1.setActionCommand("Button 1");
+    // button2.setActionCommand("Button 2");
+    // // Set the tool tip text of the button
+    // button1.setToolTipText("Button 1");
+    // button2.setToolTipText("Button 2");
+    // // Set the icon of the button

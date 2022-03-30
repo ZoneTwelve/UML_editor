@@ -1,0 +1,17 @@
+    JFrame frame = new JFrame( "UML Editor" );
+    frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+    frame.setSize( 800, 600 );
+    frame.setVisible( true );
+
+    // create left and right panels then left will be balck and right will be gray
+    JPanel left = new JPanel();
+    left.setBackground( Color.BLACK );
+    JPanel right = new JPanel();
+    right.setBackground( Color.GRAY );
+    // left take off 50% of the width and right take off 50% of the width
+    left.setPreferredSize( new Dimension( frame.getWidth() / 4, frame.getHeight() ) );
+    right.setPreferredSize( new Dimension( frame.getWidth() / 4 * 3, frame.getHeight() ) );
+    // add left and right panels to the frame
+    frame.add( left, BorderLayout.WEST );
+    frame.add( right, BorderLayout.EAST );
+

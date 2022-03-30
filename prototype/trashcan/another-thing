@@ -1,0 +1,28 @@
+
+    JPanel left = new JPanel();
+    JPanel right = new JPanel();
+    // Create the left panel
+    left.setLayout(new GridLayout(3, 1));
+    left.add(new JLabel("Left Panel"));
+    left.add(new JButton("Button 1"));
+    left.add(new JButton("Button 2"));
+    // Create the right panel
+    right.setLayout(new GridLayout(3, 1));
+    right.add(new JLabel("Right Panel"));
+    // Create the main panel
+    JPanel main = new JPanel();
+    main.setLayout(new GridLayout(1, 2));
+    main.add(left);
+    main.add(right);
+    // Add the main panel to the frame
+    add(main);
+
+    Graphics2D g2 = (Graphics2D) g;
+    Ellipse2D.Double circle = new Ellipse2D.Double(50, 50, 100, 100);
+
+    Shape circleShape = new Ellipse2D.Double(100, 100, 100, 100);
+    g2.draw(circleShape);
+    
+    Graphics2D g2d = (Graphics2D) g;
+
+    // g2d.draw(circleShape);

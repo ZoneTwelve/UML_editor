@@ -1,0 +1,45 @@
+
+  public UML_Editor( ){
+    JFrame frame = new JFrame("UML_Editor");
+    frame.setSize(800, 600);
+    frame.setVisible(true);
+    // set frame defaultCloseOperation
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    // frame.defaultCloseOperation(EXIT_ON_CLOSE);
+    // Override JFrame's paint method to draw the diagram
+    frame.add(new JPanel(){
+      public void paint(Graphics g){
+        Graphics2D g2 = (Graphics2D) g;
+        // Draw the diagram
+        Rectangle2D.Double rect = new Rectangle2D.Double(0,0,800,600);
+        g2.setColor(Color.LIGHT_GRAY);
+        g2.fill(rect);
+        g2.setColor(Color.BLACK);
+        g2.draw(rect);
+        // Draw the class
+        rect = new Rectangle2D.Double(100,100,200,300);
+        g2.setColor(Color.WHITE);
+        g2.fill(rect);
+        g2.setColor(Color.BLACK);
+        g2.draw(rect);
+        // Draw the class name
+        g2.setColor(Color.BLACK);
+        g2.setFont(new Font("Arial", Font.BOLD, 20));
+        g2.drawString("Class", 130, 130);
+        // Draw the attributes
+        g2.setFont(new Font("Arial", Font.PLAIN, 12));
+        g2.drawString("attribute1", 130, 160);
+        g2.drawString("attribute2", 130, 180);
+        g2.drawString("attribute3", 130, 200);
+        g2.drawString("attribute4", 130, 220);
+        g2.drawString("attribute5", 130, 240);
+        // Draw the operations
+        g2.setFont(new Font("Arial", Font.PLAIN, 12));
+        g2.drawString("operation1()", 130, 300);
+        g2.drawString("operation2()", 130, 320);
+        g2.drawString("operation3()", 130, 340);
+        g2.drawString("operation4()", 130, 360);
+        g2.drawString("operation5()", 130, 380);
+      }
+    }); 
+  }

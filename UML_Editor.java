@@ -9,6 +9,8 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,8 +20,7 @@ import javax.swing.ImageIcon;
 import javax.imageio.ImageIO;
 
 
-
-
+import java.util.Vector;
 
 // import mouse adapter
 import java.awt.event.MouseAdapter;
@@ -27,6 +28,7 @@ import java.awt.event.MouseEvent;
 
 public class UML_Editor{
   private int selectedFeature = 0;
+  private int sleectedItem = 0;
 
   private JFrame frame;
   private JPanel headPanel = new JPanel(), 
@@ -52,6 +54,7 @@ public class UML_Editor{
     AsstesRoot + "Class.png",
     AsstesRoot + "Use_case.png"
   };
+  private Vector<Item> items = new Vector<Item>( );
 
 
   public UML_Editor( ){
@@ -63,6 +66,30 @@ public class UML_Editor{
     frame.setVisible(true);
     frame.setMinimumSize(new Dimension(600, 400));
     frame.setPreferredSize(new Dimension(800, 600));
+
+    frame.addKeyListener(new KeyListener() {
+      @Override
+      public void keyTyped(KeyEvent e) {
+        // TODO Auto-generated method stub
+        // turn key to number
+        int key = e.getKeyChar();
+        if(key >= '0' && key <= (char)featureBtns.length + '0' ){ // Number key
+          selectFeature( key - '0' - 1 );
+        }
+        System.out.println();
+      }
+
+      @Override
+      public void keyPressed(KeyEvent e) {
+        // TODO Auto-generated method stub
+      }
+
+      @Override
+      public void keyReleased(KeyEvent e) {
+        // TODO Auto-generated method stub
+      }
+    });
+
     // create two panel, first one put on the left, second one put on the right
     // create a head panel
     JPanel headPanel = new JPanel();
@@ -120,7 +147,15 @@ public class UML_Editor{
             y = e.getY( ) - redis;
 
         g2d.fillOval( x, y, redis * 2, redis * 2 );
+      }
 
+      @Override
+      public void mousePressed(MouseEvent e) {
+        mouse.pressed = true;
+      }
+      @Override
+      public void mouseReleased(MouseEvent e) {
+        mouse.pressed = false;
       }
     });
     // disable frame resize
@@ -151,6 +186,11 @@ public class UML_Editor{
     frame.add(rightPanel, BorderLayout.EAST);
     frame.pack();
     g2d = (Graphics2D)rightPanel.getGraphics();
+
+    // Create a keyboard listener
+    
+
+
     // Create a interval execute function
     new Thread(new Runnable() {
       @Override
@@ -166,12 +206,13 @@ public class UML_Editor{
             pmouse = mouse;
             mouse.setLocation( pos );
           }
-          g2d.setColor( Color.WHITE );
+          // canvas background
+          g2d.setColor( new Color( 51, 51, 51 ) );
           g2d.fillRect( 0, 0, rightPanel.getWidth( ), rightPanel.getHeight( ) );
 
           loop( );
 
-          g2d.drawImage( assetsImage[selectedFeature], mouse.x - 10, mouse.y - 10, 20, 20, null );
+          g2d.drawImage( assetsImage[selectedFeature], mouse.x - 5, mouse.y - 5, 20, 20, null );
 
           headPanel.repaint();
           leftPanel.repaint();
@@ -181,13 +222,82 @@ public class UML_Editor{
     }).start();
   }
 
+  private void addClassItem( ){
+    Item item = new Item( );
+    item.setLocation( mouse.x, mouse.y );
+    item.setType( "Class" );
+    items.add( item );
+  }
+
+  private void addUseCaseItem( ){
+    Item item = new Item( );
+    item.setLocation( mouse.x, mouse.y );
+    item.setType( "UseCase" );
+    items.add( item );
+  }
+
   private void loop( ){
+    mouse.update( );
+
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
     g2d.setColor( Color.BLACK );
     int redis = (int) Math.sqrt( Math.pow( 50, 2 ) ) / 2;
     int x = mouse.x - redis,
         y = mouse.y - redis;
-    g2d.fillOval( x, y, redis * 2, redis * 2 );
+    if( mouse.pressed ){
+      g2d.fillOval( x, y, redis * 2, redis * 2 );
+
+    }
+    if( mouse.clicked ){
+      switch( selectedFeature ){
+        case 0:
+          System.out.println("Drag");
+        break;
+        case 1:
+          System.out.println("Add Association");
+        break;
+        case 2:
+          System.out.println("Add Generalization");
+        break;
+        case 3:
+          System.out.println("Add Composite line");
+        break;
+        case 4:
+          // selectFeature( 0 );
+          addClassItem( );
+          System.out.println("Add Class");
+        break;
+        case 5:
+          // selectFeature( 0 );
+          addUseCaseItem( );
+          System.out.println("Add Use case");
+        break;
+
+      }
+    }
+
+    // for each items
+    boolean first_lock = false;
+    for( int i = 0 ; i < items.size( ) ; i++ ){
+      Item item = items.get(i);
+      Item itemOperan = items.get( items.size() - 1 - i );
+      item.draw( g2d );
+      if( item.follow ){
+        item.setLocation( mouse.x - item.size.width / 2, mouse.y - item.size.height / 2 );
+      }
+      if( first_lock || selectedFeature != 0 ){
+        continue;
+      }
+      item = itemOperan;
+      boolean targetedObject = item.touch( mouse.getLocation( ) ) && mouse.clicked;
+      if( targetedObject ){
+        item.setFollow( true );
+        first_lock = true;
+      }else if( mouse.pressed == false ){
+        item.setFollow( false );
+      }
+    }
+    // g2d.fillOval( x, y, redis * 2, redis * 2 );
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
   }
   
@@ -195,7 +305,7 @@ public class UML_Editor{
 
   public void selectFeature( int id ){
     selectedFeature = id;
-    for(int i = 0 ; i < 6 ; i++){
+    for(int i = 0 ; i < featureBtns.length ; i++){
       featureBtns[i].highlight( selectedFeature==i );
     }
   }
@@ -236,15 +346,83 @@ class featureButton extends JLabel{
   }
 }
 
+class Size{
+  int width, height;
+  Size( ){
+    width = 50;
+    height = 50;
+  }
+  Size( int w, int h ){
+    width = w;
+    height = h;
+  }
+}
+
 class Mouse extends Point{
+  public boolean pressed = false;
+  public boolean clicked = false;
+  public boolean dragged = false;
+  public boolean clickLock = false;
   public Mouse( ){
     super(0, 0);
   }
   public Mouse( int x, int y ){
     super(x, y);
   }
+  public void update( ){
+    if( clickLock == false && pressed == true ){
+      clicked = true;
+      clickLock = true;
+    }else if( clickLock == true && pressed == false ){
+      clickLock = false;
+    }else if( clickLock == true && pressed == true ){
+      clicked = false;
+    }
+  }
 }
 
 class Item extends Point{
+  private String type;
+  public Size size = new Size(); // expect to implement, goto fucking public area
+  public boolean follow = false; // I don't give a fuck
+  public Item( int x, int y ){
+    super(x, y);
+  }
+  public Item( ){
+    super( 0, 0 );
+  }
+  public Item( int x, int y, int w, int h ){
+    super( x - w/2, y - h/2 );
+    size.width = w;
+    size.height = h;
+  }
+  public void setType( String type ){
+    this.type = type;
+  }
+  public String getType( ){
+    return type;
+  }
+  public void draw( Graphics2D g2d ){
+    switch( type ){
+      case "Class":
+        g2d.setColor( Color.WHITE );
+        g2d.fillRect( x, y, size.width, size.height );
+        g2d.setColor( Color.GRAY );
+        g2d.drawRect( x, y, size.width, size.height );
+      break;
+      case "UseCase":
+        g2d.setColor( Color.WHITE );
+        g2d.fillOval( x, y, size.width, size.height );
+        g2d.setColor( Color.GRAY );
+        g2d.drawOval( x, y, size.width, size.height );
+      break;
+    }
+  }
 
+  public boolean touch( Point p ){
+    return p.x > x && p.x < x + size.width && p.y > y && p.y < y + size.height;
+  }
+  public void setFollow( boolean follow ){
+    this.follow = follow;
+  }
 }

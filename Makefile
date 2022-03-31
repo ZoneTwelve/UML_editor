@@ -9,3 +9,5 @@ main:
 test:
 	javac $(code).java
 	java $(code)
+clean:
+	rm *.class

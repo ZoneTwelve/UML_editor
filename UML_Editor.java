@@ -21,6 +21,8 @@ import javax.swing.ImageIcon;
 import javax.imageio.ImageIO;
 
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Vector;
 
 // import mouse adapter
@@ -69,6 +71,7 @@ public class UML_Editor{
   };
   private Vector<Item> items = new Vector<Item>( );
   private Vector<String> history = new Vector<String>( );
+  private int historyIndex = -1;
 
 
   public UML_Editor( ){
@@ -82,7 +85,7 @@ public class UML_Editor{
     frame.setPreferredSize(new Dimension(800, 600));
     // set frame relative location
     // frame.setLocationRelativeTo(null);
-    frame.setLocation(0, 0);
+    // frame.setLocation(0, 0);
 
     frame.addKeyListener(new KeyListener() {
       @Override
@@ -94,7 +97,7 @@ public class UML_Editor{
           selectFeature( key - '0' - 1 );
         }
         // menu button
-        char[] menuBtnKey = { 'n', 'r', 'u' };
+        char[] menuBtnKey = { 'n', 'r', 'u', 'd' };
         for(int i = 0; i < menuBtnKey.length; i++){
           if(key == menuBtnKey[i]){
             selectMenu( i );
@@ -283,6 +286,8 @@ public class UML_Editor{
     item.setLocation( mouse.x, mouse.y );
     item.setType( "Class" );
     items.add( item );
+    history.add( "add item" );
+    historyIndex++;
   }
 
   private void addUseCaseItem( ){
@@ -291,6 +296,8 @@ public class UML_Editor{
     item.setSize( 100, 50 );
     item.setType( "UseCase" );
     items.add( item );
+    history.add( "add item" );
+    historyIndex++;
   }
 
   private void featureAssociationItem( int id ){
@@ -311,6 +318,8 @@ public class UML_Editor{
         item.setType( "Association" );
         item.setFollow( true );
         items.add( item );
+        history.add( "add item" );
+        historyIndex++;
       }
     }
   }
@@ -400,16 +409,24 @@ public class UML_Editor{
         selectedItem = i;
         item.selected = true;
         item.setFollow(true);
+        history.add( "select item " + i );
+        historyIndex++;
+        history.add( "move item from " + item.x + "," + item.y );
+        historyIndex++;
       }
       if( selectedItem == i && mouse.pressed ){
         item.setFollow(true);
       }else if( !mouse.pressed ){
         item.setFollow( false );
+        history.add( "move item to " + mouse.x + "," + mouse.y );
+        historyIndex++;
       }
     }else{
       if( mouse.clicked && selectedItem == i ){
         selectedItem = -1;
         item.selected = false;
+        history.add( "unselect item " + i );
+        historyIndex++;
       }
     }
   }
@@ -423,6 +440,27 @@ public class UML_Editor{
       case "new":
         items.clear( );
         System.out.println( "new" );
+      break;
+      case "redo":
+        // historyIndex++;
+      break;
+      case "undo":
+        String action = history.get(historyIndex);
+        System.out.println( action );
+        historyIndex--;
+        Pattern pattern = Pattern.compile("select item (\\d+)");
+        if( action == "add item" ){
+          items.remove( items.size() - 1 );
+        }
+        Matcher matcher = pattern.matcher(action);
+        if( matcher.find() ){
+          int idx = Integer.parseInt( matcher.group(1) );
+          System.out.println( idx );
+          // items.remove( idx );
+        }
+        // get id from regex /select item \d+/
+        
+        // if( action.indexOf )
       break;
       case "delete":
         System.out.println("Selected item id" + selectedItem);

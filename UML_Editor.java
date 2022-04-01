@@ -30,7 +30,7 @@ import java.awt.event.MouseEvent;
 public class UML_Editor{
   private int selectedFeature = 0;
   private int selectedMenuopt =-1;
-  private int sleectedItem = 0;
+  private int sleectedItem    =-1;
 
   private JFrame frame;
   private JPanel headPanel = new JPanel(), 
@@ -347,16 +347,19 @@ public class UML_Editor{
 
     boolean touch = item.touch( mouse.getLocation() );
     if( touch ){
-      if( mouse.clicked ){
+      if( mouse.clicked && sleectedItem == -1 ){
         sleectedItem = i;
-        item.setFollow( true );
         item.selected = true;
+      }
+      if( sleectedItem == i && mouse.pressed ){
+        item.setFollow(true);
       }
       if( !mouse.pressed ){
         item.setFollow( false );
       }
     }else{
       if( mouse.clicked ){
+        sleectedItem = -1;
         item.selected = false;
       }
     }
@@ -366,6 +369,12 @@ public class UML_Editor{
     selectedMenuopt = id;
     for(int i = 0 ; i < menuBtns.length ; i++){
       menuBtns[i].highlight( selectedMenuopt==i );
+    }
+    switch( menuBtns[selectedMenuopt].name ){
+      case "new":
+        items.clear( );
+        System.out.println( "new" );
+      break;
     }
     // create a new thread after 100 ms
     new Thread(new Runnable() {

@@ -30,7 +30,7 @@ import java.awt.event.MouseEvent;
 public class UML_Editor{
   private int selectedFeature = 0;
   private int selectedMenuopt =-1;
-  private int sleectedItem    =-1;
+  private int selectedItem    =-1;
 
   private JFrame frame;
   private JPanel headPanel = new JPanel(), 
@@ -49,7 +49,9 @@ public class UML_Editor{
   };
   private featureButton[] menuBtns = {
     new featureButton( "new",  AsstesRoot + "menu_new.png" ),
-    new featureButton( "redo", AsstesRoot + "menu_redo.png" )
+    new featureButton( "redo", AsstesRoot + "menu_redo.png" ),
+    new featureButton( "undo", AsstesRoot + "menu_undo.png" ),
+    new featureButton( "delete", AsstesRoot + "menu_del.png" )
     // new featureButton( AsstesRoot + "Open.png" ),
     // new featureButton( AsstesRoot + "Save.png" ),
     // new featureButton( AsstesRoot + "Save_as.png" ),
@@ -66,6 +68,7 @@ public class UML_Editor{
     AsstesRoot + "Use_case.png"
   };
   private Vector<Item> items = new Vector<Item>( );
+  private Vector<String> history = new Vector<String>( );
 
 
   public UML_Editor( ){
@@ -79,7 +82,7 @@ public class UML_Editor{
     frame.setPreferredSize(new Dimension(800, 600));
     // set frame relative location
     // frame.setLocationRelativeTo(null);
-    // frame.setLocation(0, 0);
+    frame.setLocation(0, 0);
 
     frame.addKeyListener(new KeyListener() {
       @Override
@@ -89,6 +92,13 @@ public class UML_Editor{
         int key = e.getKeyChar();
         if(key >= '0' && key <= (char)featureBtns.length + '0' ){ // Number key
           selectFeature( key - '0' - 1 );
+        }
+        // menu button
+        char[] menuBtnKey = { 'n', 'r', 'u' };
+        for(int i = 0; i < menuBtnKey.length; i++){
+          if(key == menuBtnKey[i]){
+            selectMenu( i );
+          }
         }
       }
 
@@ -283,6 +293,28 @@ public class UML_Editor{
     items.add( item );
   }
 
+  private void featureAssociationItem( int id ){
+    // Item item = items.get(id)
+    boolean touch = items.get(id).touch( mouse.getLocation() );
+    // get last item
+    Item lastItem = items.get(items.size()-1);
+    // boolean same = lastItem.getType() == "Association";
+    if( touch && mouse.clicked ){
+      System.out.println("Add");
+      if( lastItem.follow ){
+        Item item = lastItem;
+        item.setFollow( false );
+      }else{
+        Item item = new Item( );
+        item.setLocation( mouse.x, mouse.y );
+        item.setSize( mouse.x, mouse.y );
+        item.setType( "Association" );
+        item.setFollow( true );
+        items.add( item );
+      }
+    }
+  }
+
   private void loop( ){
     String featureName = featureBtns[selectedFeature].name;
     mouse.update( );
@@ -303,11 +335,11 @@ public class UML_Editor{
           System.out.println( featureName );
           switch( featureName ){
             case "class":
-              selectFeature( 0 );
+              // selectFeature( 0 );
               addClassItem( );
             break;
             case "usecase":
-              selectFeature( 0 );
+              // selectFeature( 0 );
               addUseCaseItem( );
             break;
           }
@@ -316,10 +348,16 @@ public class UML_Editor{
       featureBtns[selectedFeature].execClick.run();
     }
 
+    // System.out.println( "items.length = " + items.size() );
     // for each items
     boolean first_lock = false;
     for( int i = 0 ; i < items.size( ) ; i++ ){
       final int itemid = i;
+      Item item = items.get(i);
+      if( item.getType() == "Association" && item.follow ){
+        item.size.width = mouse.x;
+        item.size.height = mouse.y;
+      }
       featureBtns[selectedFeature].exec = new Runnable( ){
         @Override
         public void run( ){
@@ -327,11 +365,22 @@ public class UML_Editor{
             case "select":
               featureSelectItem( itemid );
             break;
+            case "association":
+              featureAssociationItem( itemid );
+            break;
+            case "generalization":
+              featureAssociationItem( itemid );
+            break;
+            case "composition":
+              featureAssociationItem( itemid );
+            break;
           }
         }
       };
       featureBtns[selectedFeature].exec.run( );
-      items.get(i).draw( g2d );
+      
+
+      item.draw( g2d );
     }
     // g2d.fillOval( x, y, redis * 2, redis * 2 );
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
@@ -347,19 +396,19 @@ public class UML_Editor{
 
     boolean touch = item.touch( mouse.getLocation() );
     if( touch ){
-      if( mouse.clicked && sleectedItem == -1 ){
-        sleectedItem = i;
+      if( mouse.clicked && selectedItem == -1 ){
+        selectedItem = i;
         item.selected = true;
-      }
-      if( sleectedItem == i && mouse.pressed ){
         item.setFollow(true);
       }
-      if( !mouse.pressed ){
+      if( selectedItem == i && mouse.pressed ){
+        item.setFollow(true);
+      }else if( !mouse.pressed ){
         item.setFollow( false );
       }
     }else{
-      if( mouse.clicked ){
-        sleectedItem = -1;
+      if( mouse.clicked && selectedItem == i ){
+        selectedItem = -1;
         item.selected = false;
       }
     }
@@ -374,6 +423,14 @@ public class UML_Editor{
       case "new":
         items.clear( );
         System.out.println( "new" );
+      break;
+      case "delete":
+        System.out.println("Selected item id" + selectedItem);
+        if( selectedItem != -1 ){
+          items.remove( selectedItem );
+          selectedItem = -1;
+          System.out.println( "delete" );
+        }
       break;
     }
     // create a new thread after 100 ms
@@ -404,15 +461,6 @@ public class UML_Editor{
     new UML_Editor( );
   }
 
-};
-
-class Method{
-  public void loop(){
-
-  }
-  public void click(){
-
-  }
 };
 
 class History {
@@ -500,6 +548,20 @@ class Mouse extends Point{
   }
 }
 
+class PloygonItem extends Item{
+  public int[] x, y;
+  public int n;
+  public PloygonItem( int[] _x, int[] _y, int _n ){
+    x = _x;
+    y = _y;
+    n = _n;
+  }
+  public void draw( Graphics2D g2d ){
+    g2d.setColor( Color.WHITE );
+    g2d.fillPolygon( x, y, n );
+  }
+}
+
 class Item extends Point{
   private String type;
   public Size size = new Size(); // expect to implement, goto fucking public area
@@ -536,6 +598,11 @@ class Item extends Point{
         g2d.fillOval( x, y, size.width, size.height );
         g2d.setColor( Color.BLACK );
         g2d.drawOval( x, y, size.width, size.height );
+      break;
+      case "Association":
+        // draw line
+        g2d.setColor( Color.WHITE );
+        g2d.drawLine( x, y, size.width, size.height );
       break;
     }
 

@@ -13,8 +13,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JButton;
 import javax.swing.border.*;
 import javax.swing.ImageIcon;
 import javax.imageio.ImageIO;
@@ -28,6 +29,7 @@ import java.awt.event.MouseEvent;
 
 public class UML_Editor{
   private int selectedFeature = 0;
+  private int selectedMenuopt =-1;
   private int sleectedItem = 0;
 
   private JFrame frame;
@@ -38,12 +40,21 @@ public class UML_Editor{
   private String AsstesRoot = "Assets/";
   private Mouse mouse = new Mouse( ), pmouse = new Mouse( );
   private featureButton[] featureBtns = {
-    new featureButton( AsstesRoot + "Arrow_pointer.png" ),
-    new featureButton( AsstesRoot + "Association_line.png" ),
-    new featureButton( AsstesRoot + "Generalization_line.png" ),
-    new featureButton( AsstesRoot + "Composition_line.png" ),
-    new featureButton( AsstesRoot + "Class.png" ),
-    new featureButton( AsstesRoot + "Use_case.png" )
+    new featureButton( "select",         AsstesRoot + "Arrow_pointer.png" ),
+    new featureButton( "association",    AsstesRoot + "Association_line.png" ),
+    new featureButton( "generalization", AsstesRoot + "Generalization_line.png" ),
+    new featureButton( "composition",    AsstesRoot + "Composition_line.png" ),
+    new featureButton( "class",          AsstesRoot + "Class.png" ),
+    new featureButton( "usecase",        AsstesRoot + "Use_case.png" )
+  };
+  private featureButton[] menuBtns = {
+    new featureButton( "new",  AsstesRoot + "menu_new.png" ),
+    new featureButton( "redo", AsstesRoot + "menu_redo.png" )
+    // new featureButton( AsstesRoot + "Open.png" ),
+    // new featureButton( AsstesRoot + "Save.png" ),
+    // new featureButton( AsstesRoot + "Save_as.png" ),
+    // new featureButton( AsstesRoot + "Print.png" ),
+    // new featureButton( AsstesRoot + "Exit.png" )
   };
   private BufferedImage assetsImage[];
   private String ImageResourcePath[] = {
@@ -66,6 +77,9 @@ public class UML_Editor{
     frame.setVisible(true);
     frame.setMinimumSize(new Dimension(600, 400));
     frame.setPreferredSize(new Dimension(800, 600));
+    // set frame relative location
+    // frame.setLocationRelativeTo(null);
+    // frame.setLocation(0, 0);
 
     frame.addKeyListener(new KeyListener() {
       @Override
@@ -76,7 +90,6 @@ public class UML_Editor{
         if(key >= '0' && key <= (char)featureBtns.length + '0' ){ // Number key
           selectFeature( key - '0' - 1 );
         }
-        System.out.println();
       }
 
       @Override
@@ -112,11 +125,37 @@ public class UML_Editor{
     rightPanel.setLayout(new BorderLayout());
     
 
-    // // head
+    // head panel
+    // append button to head panel
+    for(int i = 0; i < menuBtns.length; i++){
+      menuBtns[i].id = i;
+      menuBtns[i].setPreferredSize(new Dimension(64, 32));
+      menuBtns[i].setHighlightBorder(new LineBorder(new Color( 255, 255, 255 ), 1), new LineBorder(new Color( 255, 255, 255 ), 0));
+      menuBtns[i].setHighlight( new Color( 107, 107, 107 ), new Color( 49, 49, 49 ) );
+      menuBtns[i].highlight( selectedMenuopt==i );
+      // menuBtns[i].setBackground(new Color( 71, 71, 71 ));
+      // menuBtns[i].setForeground(new Color( 255, 255, 255 ));
+      // menuBtns[i].setFocusPainted(false);
+      // menuBtns[i].setContentAreaFilled(false);
+      menuBtns[i].setOpaque(true);
+      menuBtns[i].addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+          featureButton btn = (featureButton)e.getSource();
+          selectMenu( btn.id );
+        }
+      });
+      // set text
+      // menuBtns[i].setText(String.valueOf(i + 1));
+      headPanel.add(menuBtns[i]);
+    }
+    
+    
+    
 
-    // // left
     
-    
+
+    // left
     for( int i = 0 ; i < featureBtns.length ; i++ ){
       featureBtns[i].id = i;
       featureBtns[i].setBounds(0, i * 50, 180, 50);
@@ -134,8 +173,15 @@ public class UML_Editor{
           selectFeature( btn.id );
         }
       });
+      // switch( featureBtns[i].name ){
+      //   case "select":
+      //     featureBtns[i].exec = featureSelectItem;
+      //   break;
+      // }
+      
       leftPanel.add(featureBtns[i]);
-    }    
+    }
+    
 
     // right
     rightPanel.addMouseListener( new MouseAdapter() {
@@ -232,11 +278,13 @@ public class UML_Editor{
   private void addUseCaseItem( ){
     Item item = new Item( );
     item.setLocation( mouse.x, mouse.y );
+    item.setSize( 100, 50 );
     item.setType( "UseCase" );
     items.add( item );
   }
 
   private void loop( ){
+    String featureName = featureBtns[selectedFeature].name;
     mouse.update( );
 
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
@@ -249,59 +297,92 @@ public class UML_Editor{
 
     }
     if( mouse.clicked ){
-      switch( selectedFeature ){
-        case 0:
-          System.out.println("Drag");
-        break;
-        case 1:
-          System.out.println("Add Association");
-        break;
-        case 2:
-          System.out.println("Add Generalization");
-        break;
-        case 3:
-          System.out.println("Add Composite line");
-        break;
-        case 4:
-          // selectFeature( 0 );
-          addClassItem( );
-          System.out.println("Add Class");
-        break;
-        case 5:
-          // selectFeature( 0 );
-          addUseCaseItem( );
-          System.out.println("Add Use case");
-        break;
-
-      }
+      featureBtns[selectedFeature].execClick = new Runnable( ){
+        @Override
+        public void run( ){
+          System.out.println( featureName );
+          switch( featureName ){
+            case "class":
+              selectFeature( 0 );
+              addClassItem( );
+            break;
+            case "usecase":
+              selectFeature( 0 );
+              addUseCaseItem( );
+            break;
+          }
+        }
+      };
+      featureBtns[selectedFeature].execClick.run();
     }
 
     // for each items
     boolean first_lock = false;
     for( int i = 0 ; i < items.size( ) ; i++ ){
-      Item item = items.get(i);
-      Item itemOperan = items.get( items.size() - 1 - i );
-      item.draw( g2d );
-      if( item.follow ){
-        item.setLocation( mouse.x - item.size.width / 2, mouse.y - item.size.height / 2 );
-      }
-      if( first_lock || selectedFeature != 0 ){
-        continue;
-      }
-      item = itemOperan;
-      boolean targetedObject = item.touch( mouse.getLocation( ) ) && mouse.clicked;
-      if( targetedObject ){
-        item.setFollow( true );
-        first_lock = true;
-      }else if( mouse.pressed == false ){
-        item.setFollow( false );
-      }
+      final int itemid = i;
+      featureBtns[selectedFeature].exec = new Runnable( ){
+        @Override
+        public void run( ){
+          switch( featureName ){
+            case "select":
+              featureSelectItem( itemid );
+            break;
+          }
+        }
+      };
+      featureBtns[selectedFeature].exec.run( );
+      items.get(i).draw( g2d );
     }
     // g2d.fillOval( x, y, redis * 2, redis * 2 );
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
   }
-  
 
+  private void featureSelectItem( int i ){
+    Item item = items.get(i);
+    Item itemOperan = items.get( items.size() - 1 - i );
+    item.draw( g2d );
+    if( item.follow ){
+      item.setLocation( mouse.x - item.size.width / 2, mouse.y - item.size.height / 2 );
+    }
+
+    boolean touch = item.touch( mouse.getLocation() );
+    if( touch ){
+      if( mouse.clicked ){
+        sleectedItem = i;
+        item.setFollow( true );
+        item.selected = true;
+      }
+      if( !mouse.pressed ){
+        item.setFollow( false );
+      }
+    }else{
+      if( mouse.clicked ){
+        item.selected = false;
+      }
+    }
+  }
+  
+  public void selectMenu( int id ){
+    selectedMenuopt = id;
+    for(int i = 0 ; i < menuBtns.length ; i++){
+      menuBtns[i].highlight( selectedMenuopt==i );
+    }
+    // create a new thread after 100 ms
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try{
+          Thread.sleep(100);
+        }catch(Exception e){
+          e.printStackTrace();
+        }
+        selectedMenuopt = -1;
+        for(int i = 0 ; i < menuBtns.length ; i++){
+          menuBtns[i].highlight( selectedMenuopt==i );
+        }
+      }
+    }).start();
+  }
 
   public void selectFeature( int id ){
     selectedFeature = id;
@@ -316,26 +397,44 @@ public class UML_Editor{
 
 };
 
+class Method{
+  public void loop(){
+
+  }
+  public void click(){
+
+  }
+};
+
 class History {
   private String target; // [ Mouse, Class, Association, Generalization, Composition, UseCase ]
   // private Point position; // [ Class, Association, Generalization, Composition, UseCase ]
 }
 
 class featureButton extends JLabel{
+  public String name;
   public int id; // I don't give a fuck
   private ImageIcon icon;
   private Color bg_color = new Color(49, 49, 49);
   private Color bg_color_defocus = new Color(79, 79, 79);
 
-  featureButton(String path){
+  public boolean enableBorder = false; // just don't give a fuck
+  private LineBorder border_focus = new LineBorder(Color.WHITE, 1);
+  private LineBorder border_defocus = new LineBorder(Color.BLACK, 1);
+
+  public Runnable exec, execClick;
+
+  featureButton(String _name, String path){
+    name = _name;
     icon = new ImageIcon(path);
     setIcon(icon);
   }
+  // @Override
+  // public void setBackground( Color bg ){
+  //   super.setBackground(bg);
+  // }
 
-  @Override
-  public void setBackground( Color bg ){
-    super.setBackground(bg);
-  }
+  
 
   public void setHighlight( Color focus_color, Color defocus_color ){
     bg_color_defocus = defocus_color;
@@ -343,6 +442,15 @@ class featureButton extends JLabel{
   }
   public void highlight( boolean s ){
     setBackground( s==true ? bg_color : bg_color_defocus );
+    if( enableBorder ){
+      setBorder( s==true ? border_focus : border_defocus );
+    }
+  }
+
+  public void setHighlightBorder( LineBorder focus_border, LineBorder defocus_border ){
+    enableBorder = true;
+    border_focus = focus_border;
+    border_defocus = defocus_border;
   }
 }
 
@@ -370,6 +478,8 @@ class Mouse extends Point{
     super(x, y);
   }
   public void update( ){
+
+    // click event
     if( clickLock == false && pressed == true ){
       clicked = true;
       clickLock = true;
@@ -385,6 +495,8 @@ class Item extends Point{
   private String type;
   public Size size = new Size(); // expect to implement, goto fucking public area
   public boolean follow = false; // I don't give a fuck
+  public boolean selected = false; // Also I don't give a fuck, just make everything public
+  // When information already public, nothing is leaked.
   public Item( int x, int y ){
     super(x, y);
   }
@@ -407,15 +519,24 @@ class Item extends Point{
       case "Class":
         g2d.setColor( Color.WHITE );
         g2d.fillRect( x, y, size.width, size.height );
-        g2d.setColor( Color.GRAY );
+        g2d.setColor( Color.BLACK );
         g2d.drawRect( x, y, size.width, size.height );
       break;
       case "UseCase":
         g2d.setColor( Color.WHITE );
         g2d.fillOval( x, y, size.width, size.height );
-        g2d.setColor( Color.GRAY );
+        g2d.setColor( Color.BLACK );
         g2d.drawOval( x, y, size.width, size.height );
       break;
+    }
+
+    if( selected ){
+      g2d.setColor( Color.BLACK );
+      // need sub item system
+      for( int i = 0 ; i < 4 ; i++ ){
+        int ax = i & 0b01, ay = (i & 0b10)/2;
+        g2d.fillRect( x + ax * size.width - 5, y + ay * size.height - 5, 10, 10 );
+      }
     }
   }
 
@@ -424,5 +545,9 @@ class Item extends Point{
   }
   public void setFollow( boolean follow ){
     this.follow = follow;
+  }
+  public void setSize( int w, int h ){
+    size.width = w;
+    size.height = h;
   }
 }

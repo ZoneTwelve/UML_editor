@@ -186,11 +186,6 @@ public class UML_Editor{
           selectFeature( btn.id );
         }
       });
-      // switch( featureBtns[i].name ){
-      //   case "select":
-      //     featureBtns[i].exec = featureSelectItem;
-      //   break;
-      // }
       
       leftPanel.add(featureBtns[i]);
     }
@@ -219,15 +214,6 @@ public class UML_Editor{
     });
     // disable frame resize
     frame.setResizable(false);
-    // frame.addComponentListener(new java.awt.event.ComponentAdapter() {
-    //   public void componentResized(java.awt.event.ComponentEvent evt) {
-    //     int width = frame.getWidth( ),
-    //         height = frame.getHeight( );
-    //     // headPanel.setPreferredSize(new Dimension(width, 50));
-    //     // leftPanel.setPreferredSize(new Dimension(200, height));
-    //     // rightPanel.setPreferredSize(new Dimension(width, height));
-    //   }
-    // });
     
     // load image resource
     assetsImage = new BufferedImage[ImageResourcePath.length];
